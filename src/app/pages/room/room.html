@@ -1,0 +1,21 @@
+<h3>Rooms</h3>
+
+<div *ngIf="roomService.state() === 'disconnected'">
+  <input type="text" [(ngModel)]="username" placeholder="Username" />
+  <div>
+    <button (click)="createRoom()" [disabled]="!username">Create room</button>
+  </div>
+  <div>
+    <input type="text" [(ngModel)]="roomId" placeholder="Room ID" />
+    <button (click)="joinRoom()" [disabled]="!(roomId && username)">Join room</button>
+  </div>
+</div>
+<div *ngIf="roomService.state() !== 'disconnected'">
+  <button (click)="disconnect()" [disabled]="roomService.state() === 'disconnected'">Disconnect</button>
+</div>
+
+<p>Status: {{ roomService.state() }}</p>
+<p>RoomId: {{ roomService.roomId() }}</p>
+<p>Username: {{ username }}</p>
+
+<hr />
