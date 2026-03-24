@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import Team from './types/team';
+import { TeamStatus } from './types/team';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,7 @@ export default class Timer {
   private teamTimers: { [key: number]: any } = {};
   private activeTeamId = signal<number>(0);
   private timerOn = signal<boolean>(false);
+  private winnerTeamId = signal<number | null>(null);
 
   get teams() {
     return this._teams();
@@ -26,6 +28,7 @@ export default class Timer {
       score: 0,
       time: 60000, // 60 seconds in milliseconds
       players: [],
+      status: TeamStatus.InGame,
     };
     this.addTeam(newTeam);
   }
@@ -132,6 +135,14 @@ export default class Timer {
 
   goToNextTeam() {
     this.activeTeamId.update((currentId) => {
+      let i = 1;
+      while (i <= this.numberOfTeams()) {
+        const nextId = (currentId + i) % this.numberOfTeams();
+        if (this.teams[nextId].time > 0) {
+          return nextId;
+        }
+        i++;
+      }
       return (currentId + 1) % this.numberOfTeams();
     });
   }
@@ -149,6 +160,19 @@ export default class Timer {
 
       this.stopTimer();
       this.goToNextTeam();
+
+      if (activeTeam == this.getActiveTeam()) {
+        this.winnerTeamId.set(activeTeam.id);
+        this._teams.update((teams) => {
+          const team = teams.find((t) => t.id === activeTeam.id);
+          if (team) {
+            team.status = TeamStatus.Winner;
+          }
+          return [...teams];
+        });
+        return;
+      }
+
       this.startTimer();
     }
   }
