@@ -1,5 +1,3 @@
-<p>score works!</p>
-
 @if (this.settingUp) {
 <form [formGroup]="teamForm" (ngSubmit)="this.submitTeam()">
     <input type="text" formControlName="teamName" placeholder="Team Name" class="form-control mb-2" />
@@ -15,7 +13,7 @@
     <div class="card-body">
         <h5 class="card-title">{{ team.name }}</h5>
         <p class="card-text">Players: {{ this.getPlayerNames(team) }}</p>
-        
+
         @if (!this.settingUp) {
         <p class="card-text">Score: {{ team.score }}</p>
         <button (click)="this.addScore(team.id, 1)" class="btn btn-primary">+1</button>

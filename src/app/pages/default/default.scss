@@ -9,38 +9,75 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: #f4f7f9;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.container {
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 40px;
+.menu-container {
+  width: 100%;
+  max-width: 900px;
   text-align: center;
-  width: 90%;
-  max-width: 450px;
-  color: #333;
 }
 
 h1 {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
   color: #2c3e50;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-  padding-bottom: 10px;
+  letter-spacing: 1px;
 }
 
-.section {
-  margin-bottom: 40px;
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
 
-  &:last-child {
-    margin-bottom: 0;
+.menu-card {
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  color: #2c3e50;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  text-align: left;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   }
+
+  h2 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin: 0;
+  }
+}
+
+
+.card-1 {
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+}
+
+.card-2 {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+.card-3 {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.card-4 {
+  background: linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%);
 }

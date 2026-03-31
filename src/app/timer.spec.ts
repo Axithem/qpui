@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Timer } from './timer';
+import Timer from './timer';
 
 describe('Timer', () => {
   let service: Timer;

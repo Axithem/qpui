@@ -1,15 +1,30 @@
-<!-- 
-     Simple modern UI layout, leveraging basic Glassmorphism techniques 
-     Concepts adapted from: https://glassmorphism.com/
--->
-<div class="container">
-  <div class="section">
-    <h1>Scoreboard</h1>
-    <app-score />
-  </div>
+<!-- Menu Principal -->
+<div class="menu-container">
+  <h1>Questions pour un Ingénieur</h1>
 
-  <div class="section">
-    <h1>Timer</h1>
-    <app-timer />
+  <p class="menu-description">
+    Le très célèbre jeu de QUIZ de Polytech Montpellier, organisé par Max Chateau la Queen.
+  </p>
+
+  <div class="menu-grid">
+    <div class="menu-card" [routerLink]="['/backlog']">
+      <h2>Backlog des questions</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam eu pulvinar neque, in aliquam lectus.</p>
+    </div>
+
+    <div class="menu-card" [routerLink]="['/teams']">
+      <h2>Générateur d'équipes et timers</h2>
+      <p>Suspendisse potenti. Phasellus in libero et nulla volutpat finibus in at felis. Ut ac nisi risus.</p>
+    </div>
+
+    <div class="menu-card" [routerLink]="['/buzzers']">
+      <h2>Buzzers</h2>
+      <p>Nullam fermentum tristique eros sed convallis. Mauris commodo congue ex id eleifend vitae sed aliquet id.</p>
+    </div>
+
+    <div class="menu-card" [routerLink]="['/archives']">
+      <h2>Editions précédentes</h2>
+      <p>Praesent eget ipsum eget augue convallis maximus. In hac habitasse platea dictumst donec pellentesque enim.</p>
+    </div>
   </div>
 </div>
