@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { computed, Injectable, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import TimerService from '../timer';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import Team from '../types/team';
@@ -17,6 +16,9 @@ export class Timer {
   setup = signal<boolean>(true);
 
   finishSetup() {
+    if (this.teams().length > 0) {
+      this.timerService.setActiveTeam(this.teams()[0].id);
+    }
     this.setup.set(false);  
   }
 
@@ -32,7 +34,7 @@ export class Timer {
 
   formatTime(milliseconds: number): string {
     const totalSeconds = Math.floor(milliseconds / 1000);
-    const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds (10ms units)
+    const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60);
     
@@ -50,6 +52,41 @@ export class Timer {
       this.timerService.addPlayerToTeam(teamId, player1);
       this.timerService.addPlayerToTeam(teamId, player2);
       this.teamForm.reset();
+    }
+  }
+
+  startNewSetup() {
+    this.timerService.clearAll();
+    this.setup.set(true);
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Only capture keys when not in setup mode
+    if (this.setup()) return;
+
+    // Check if user is typing in a text input or textarea
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    if (event.code === 'Space' || event.key === ' ') {
+      // Prevent page scrolling or button triggering
+      event.preventDefault();
+
+      // Toggle play/pause
+      if (this.timerService.getTimerStatus()) {
+        this.timerService.stopTimer();
+      } else {
+        this.timerService.startTimer();
+      }
+    } else if (event.code === 'Enter' || event.key === 'Enter') {
+      // Prevent default action
+      event.preventDefault();
+
+      // Trigger Bonne Réponse (correct answer)
+      this.timerService.goodAnswer();
     }
   }
 }

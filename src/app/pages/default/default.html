@@ -3,13 +3,25 @@
      Concepts adapted from: https://glassmorphism.com/
 -->
 <div class="container">
-  <div class="section">
-    <h1>Scoreboard</h1>
-    <app-score />
+  <div class="tabs-navigation">
+    <button (click)="setTab('scoreboard')" [class.active]="activeTab() === 'scoreboard'" class="tab-btn">
+      🏆 Scoreboard
+    </button>
+    <button (click)="setTab('timer')" [class.active]="activeTab() === 'timer'" class="tab-btn">
+      ⏱️ Timer
+    </button>
   </div>
 
-  <div class="section">
-    <h1>Timer</h1>
-    <app-timer />
+  <div class="tab-content">
+    @if (activeTab() === 'timer') {
+    <div class="section">
+      <app-timer />
+    </div>
+    }
+    @if (activeTab() === 'scoreboard') {
+    <div class="section">
+      <app-score />
+    </div>
+    }
   </div>
 </div>
