@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import TimerService from '../timer';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import Team from '../types/team';
@@ -58,5 +58,35 @@ export class Timer {
   startNewSetup() {
     this.timerService.clearAll();
     this.setup.set(true);
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Only capture keys when not in setup mode
+    if (this.setup()) return;
+
+    // Check if user is typing in a text input or textarea
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    if (event.code === 'Space' || event.key === ' ') {
+      // Prevent page scrolling or button triggering
+      event.preventDefault();
+
+      // Toggle play/pause
+      if (this.timerService.getTimerStatus()) {
+        this.timerService.stopTimer();
+      } else {
+        this.timerService.startTimer();
+      }
+    } else if (event.code === 'Enter' || event.key === 'Enter') {
+      // Prevent default action
+      event.preventDefault();
+
+      // Trigger Bonne Réponse (correct answer)
+      this.timerService.goodAnswer();
+    }
   }
 }
