@@ -29,6 +29,49 @@ export class Timer {
     return team.players.map(p => p.name).join(', ');
   }
 
+  getCurrentPlayer(): string {
+    const activeTeam = this.timerService.getActiveTeam();
+    if (activeTeam && activeTeam.players.length > 0) {
+      const activePlayer = activeTeam.players.find(p => p.active);
+      return activePlayer ? activePlayer.name : activeTeam.players[0].name;
+    }
+    return '';
+  }
+
+  getNextPlayer(): string {
+    const teams = this.timerService.teams;
+    if (teams.length === 0) return '';
+    const activeTeam = this.timerService.getActiveTeam();
+    if (!activeTeam) return '';
+    
+    const currentIndex = teams.findIndex(t => t.id === activeTeam.id);
+    if (currentIndex === -1) return '';
+
+    if (teams.length === 1) {
+      if (activeTeam.players.length <= 1) return '';
+      const activePlayerIndex = activeTeam.players.findIndex(p => p.active);
+      const nextPlayerIndex = (activePlayerIndex !== -1) ? (activePlayerIndex + 1) % activeTeam.players.length : 1;
+      return activeTeam.players[nextPlayerIndex]?.name || '';
+    } else {
+      const nextTeamIndex = (currentIndex + 1) % teams.length;
+      const nextTeam = teams[nextTeamIndex];
+      if (nextTeam.players.length === 0) return '';
+      const nextActivePlayer = nextTeam.players.find(p => p.active);
+      return nextActivePlayer ? nextActivePlayer.name : nextTeam.players[0].name;
+    }
+  }
+
+  getNextTeamName(): string {
+    const teams = this.timerService.teams;
+    if (teams.length <= 1) return '';
+    const activeTeam = this.timerService.getActiveTeam();
+    if (!activeTeam) return '';
+    const currentIndex = teams.findIndex(t => t.id === activeTeam.id);
+    if (currentIndex === -1) return '';
+    const nextTeamIndex = (currentIndex + 1) % teams.length;
+    return teams[nextTeamIndex]?.name || '';
+  }
+
   formatTime(milliseconds: number): string {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds (10ms units)

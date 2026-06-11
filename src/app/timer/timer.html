@@ -12,6 +12,13 @@
 <button (click)="this.finishSetup()" class="btn btn-success mt-3">Finish Setup</button>
 }
 @else {
+<div class="mb-3">
+    <p>Current Player: <strong>{{ this.getCurrentPlayer() }}</strong> ({{ this.timerService.getActiveTeam()?.name }})</p>
+    @if (this.getNextPlayer()) {
+    <p>Next Player: <strong>{{ this.getNextPlayer() }}</strong>@if (this.getNextTeamName()) { ({{ this.getNextTeamName() }}) }</p>
+    }
+</div>
+
 @if (this.timerService.getTimerStatus()) {
 <button (click)="this.timerService.goodAnswer()" class="btn btn-primary">Bonne Réponse</button>
 <button (click)="this.timerService.stopTimer()" class="btn btn-secondary">Pause</button>
