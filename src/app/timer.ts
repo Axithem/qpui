@@ -37,7 +37,7 @@ export default class Timer {
         const newPlayer = {
           id: Date.now(),
           name: playerName,
-          active: false,
+          active: team.players.length === 0,
         };
         team.players.push(newPlayer);
       }
@@ -143,6 +143,13 @@ export default class Timer {
         const team = teams.find((t) => t.id === activeTeam.id);
         if (team) {
           team.score += 1;
+          if (team.players.length > 0) {
+            const activeIndex = team.players.findIndex((p) => p.active);
+            const nextIndex = activeIndex !== -1 ? (activeIndex + 1) % team.players.length : 0;
+            team.players.forEach((p, idx) => {
+              p.active = idx === nextIndex;
+            });
+          }
         }
         return [...teams];
       });

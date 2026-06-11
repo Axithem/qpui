@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { computed, Injectable, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import TimerService from '../timer';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import Team from '../types/team';
@@ -17,7 +16,7 @@ export class Timer {
   setup = signal<boolean>(true);
 
   finishSetup() {
-    this.setup.set(false);  
+    this.setup.set(false);
   }
 
   readonly teamForm = new FormGroup({
@@ -30,12 +29,55 @@ export class Timer {
     return team.players.map(p => p.name).join(', ');
   }
 
+  getCurrentPlayer(): string {
+    const activeTeam = this.timerService.getActiveTeam();
+    if (activeTeam && activeTeam.players.length > 0) {
+      const activePlayer = activeTeam.players.find(p => p.active);
+      return activePlayer ? activePlayer.name : activeTeam.players[0].name;
+    }
+    return '';
+  }
+
+  getNextPlayer(): string {
+    const teams = this.timerService.teams;
+    if (teams.length === 0) return '';
+    const activeTeam = this.timerService.getActiveTeam();
+    if (!activeTeam) return '';
+    
+    const currentIndex = teams.findIndex(t => t.id === activeTeam.id);
+    if (currentIndex === -1) return '';
+
+    if (teams.length === 1) {
+      if (activeTeam.players.length <= 1) return '';
+      const activePlayerIndex = activeTeam.players.findIndex(p => p.active);
+      const nextPlayerIndex = (activePlayerIndex !== -1) ? (activePlayerIndex + 1) % activeTeam.players.length : 1;
+      return activeTeam.players[nextPlayerIndex]?.name || '';
+    } else {
+      const nextTeamIndex = (currentIndex + 1) % teams.length;
+      const nextTeam = teams[nextTeamIndex];
+      if (nextTeam.players.length === 0) return '';
+      const nextActivePlayer = nextTeam.players.find(p => p.active);
+      return nextActivePlayer ? nextActivePlayer.name : nextTeam.players[0].name;
+    }
+  }
+
+  getNextTeamName(): string {
+    const teams = this.timerService.teams;
+    if (teams.length <= 1) return '';
+    const activeTeam = this.timerService.getActiveTeam();
+    if (!activeTeam) return '';
+    const currentIndex = teams.findIndex(t => t.id === activeTeam.id);
+    if (currentIndex === -1) return '';
+    const nextTeamIndex = (currentIndex + 1) % teams.length;
+    return teams[nextTeamIndex]?.name || '';
+  }
+
   formatTime(milliseconds: number): string {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds (10ms units)
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60);
-    
+
     return `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
   }
 
@@ -50,6 +92,30 @@ export class Timer {
       this.timerService.addPlayerToTeam(teamId, player1);
       this.timerService.addPlayerToTeam(teamId, player2);
       this.teamForm.reset();
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.setup()) return;
+
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    if (event.code === 'Space' || event.key === ' ') {
+      event.preventDefault();
+
+      if (this.timerService.getTimerStatus()) {
+        this.timerService.stopTimer();
+      } else {
+        this.timerService.startTimer();
+      }
+    } else if (event.code === 'Enter' || event.key === 'Enter') {
+      event.preventDefault();
+
+      this.timerService.goodAnswer();
     }
   }
 }
