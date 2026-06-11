@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { computed, Injectable, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import TimerService from '../timer';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import Team from '../types/team';
@@ -17,7 +16,7 @@ export class Timer {
   setup = signal<boolean>(true);
 
   finishSetup() {
-    this.setup.set(false);  
+    this.setup.set(false);
   }
 
   readonly teamForm = new FormGroup({
@@ -35,7 +34,7 @@ export class Timer {
     const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds (10ms units)
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60);
-    
+
     return `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
   }
 
@@ -50,6 +49,30 @@ export class Timer {
       this.timerService.addPlayerToTeam(teamId, player1);
       this.timerService.addPlayerToTeam(teamId, player2);
       this.teamForm.reset();
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.setup()) return;
+
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    if (event.code === 'Space' || event.key === ' ') {
+      event.preventDefault();
+
+      if (this.timerService.getTimerStatus()) {
+        this.timerService.stopTimer();
+      } else {
+        this.timerService.startTimer();
+      }
+    } else if (event.code === 'Enter' || event.key === 'Enter') {
+      event.preventDefault();
+
+      this.timerService.goodAnswer();
     }
   }
 }
