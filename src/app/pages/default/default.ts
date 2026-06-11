@@ -11,4 +11,9 @@ import { Score } from '../../score/score';
 })
 export class DefaultPage {
   protected readonly title = signal('qpui');
+  readonly activeTab = signal<'timer' | 'scoreboard'>('timer');
+
+  setTab(tab: 'timer' | 'scoreboard') {
+    this.activeTab.set(tab);
+  }
 }

@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import ScoreService from '../services/score';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import Team from '../types/team';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-score',
@@ -11,18 +11,12 @@ import Team from '../types/team';
 })
 export class Score {
   readonly scoreService = inject(ScoreService);
-  settingUp = true;
+  teams = computed(() => this.scoreService.teams);
 
-  addScore(teamId: number, points: number) {
-    this.scoreService.addTeamScore(teamId, points);
-  }
+  setup = signal<boolean>(true);
 
   finishSetup() {
-    this.settingUp = false;  
-  }
-
-  getPlayerNames(team: Team): string {
-    return team.players.map(p => p.name).join(', ');
+    this.setup.set(false);  
   }
 
   readonly teamForm = new FormGroup({
@@ -43,5 +37,18 @@ export class Score {
       this.scoreService.addPlayerToTeam(teamId, player2);
       this.teamForm.reset();
     }
+  }
+
+  addScore(teamId: number, points: number) {
+    this.scoreService.addTeamScore(teamId, points);
+  }
+
+  getPlayerNames(team: Team): string {
+    return team.players.map(p => p.name).join(', ');
+  }
+
+  startNewSetup() {
+    this.scoreService.clearAll();
+    this.setup.set(true);
   }
 }

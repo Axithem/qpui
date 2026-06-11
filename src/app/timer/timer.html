@@ -1,33 +1,166 @@
-<p>timer works!</p>
+<div class="timer-container">
+  @if (this.setup()) {
+  <div class="setup-panel glass-panel">
+    <h2 class="setup-title">Round Setup</h2>
+    <p class="setup-subtitle">Add up to 4 teams. Each team must have exactly 2 players.</p>
 
-@if (this.setup()) {
-<form [formGroup]="teamForm" (ngSubmit)="this.submitTeam()">
-    <input type="text" formControlName="teamName" placeholder="Team Name" class="form-control mb-2" />
-    <input type="text" formControlName="player1" placeholder="Player 1" class="form-control mb-2" />
-    <input type="text" formControlName="player2" placeholder="Player 2" class="form-control mb-2" />
+    @if (this.teams().length < 4) { <form [formGroup]="teamForm" (ngSubmit)="this.submitTeam()" class="setup-form">
+      <div class="form-group">
+        <input type="text" formControlName="teamName" placeholder="Team Name" class="input-field" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group col">
+          <input type="text" formControlName="player1" placeholder="Player 1 Name" class="input-field" required />
+        </div>
+        <div class="form-group col">
+          <input type="text" formControlName="player2" placeholder="Player 2 Name" class="input-field" required />
+        </div>
+      </div>
+      <button type="submit" [disabled]="!teamForm.valid" class="btn btn-add">Add Team</button>
+      </form>
+      } @else {
+      <div class="max-teams-alert">
+        <span class="icon">✨</span> Maximum of 4 teams reached. Ready to start!
+      </div>
+      }
 
-    <button type="submit" class="btn btn-primary">Add Team</button>
-</form>
+      @if (this.teams().length > 0) {
+      <div class="teams-list">
+        <h3>Registered Teams ({{ this.teams().length }})</h3>
+        <div class="teams-grid">
+          @for (team of this.teams(); track team.id) {
+          <div class="team-setup-card glass-card">
+            <div class="team-card-header">
+              <span class="team-name">{{ team.name }}</span>
+              <button type="button" (click)="timerService.removeTeam(team.id)" class="btn-remove"
+                title="Remove Team">×</button>
+            </div>
+            <div class="team-players">
+              <span class="player-tag">{{ team.players[0]?.name }}</span>
+              <span class="player-tag">{{ team.players[1]?.name }}</span>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
 
-<button (click)="this.finishSetup()" class="btn btn-success mt-3">Finish Setup</button>
-}
-@else {
-@if (this.timerService.getTimerStatus()) {
-<button (click)="this.timerService.goodAnswer()" class="btn btn-primary">Bonne Réponse</button>
-<button (click)="this.timerService.stopTimer()" class="btn btn-secondary">Pause</button>
-}
-@else {
-<button (click)="this.timerService.startTimer()" class="btn btn-primary">Start Timer</button>
-}
-}
+      <div class="setup-actions">
+        <button (click)="this.finishSetup()" [disabled]="this.teams().length < 2" class="btn btn-start">
+          Start Quiz Round
+        </button>
+      </div>
+  </div>
+  }
+  @else {
+  <!-- Active Game / Game Over Panel -->
+  <div class="game-panel">
+    @if (timerService.winnerTeam()) {
+    <!-- Game Over Screen -->
+    <div class="game-over-screen glass-panel">
+      <div class="game-over-icon">🏆</div>
+      <h2 class="game-over-title">Round Over!</h2>
+      <p class="game-over-message">
+        Winner: <strong>{{ timerService.winnerTeam()?.name }}</strong> 🎉
+      </p>
 
-@for (team of this.timerService.teams; track team.id) {
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">{{ team.name }}</h5>
-        <p class="card-text">Players: {{ this.getPlayerNames(team) }}</p>
-        <p class="card-text">Score: {{ team.score }}</p>
-        <p class="card-text">Time: {{ this.formatTime(team.time) }}</p>
+      <div class="final-scores">
+        <h3>Round Scores</h3>
+        <div class="scores-list">
+          @for (team of this.teams(); track team.id) {
+          <div class="score-row" [class.ran-out]="team.time <= 0">
+            <span class="team-name">{{ team.name }}</span>
+            <span class="team-score">{{ team.score }} pts ({{ formatTime(team.time) }} left)</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="game-over-actions">
+        <button (click)="timerService.resetGame()" class="btn btn-replay">Replay Round</button>
+        <button (click)="this.startNewSetup()" class="btn btn-edit">New Setup</button>
+      </div>
     </div>
+    }
+    @else {
+    <!-- Active Game Turn Screen -->
+    <div class="game-active-screen">
+
+      <!-- Global Control & Status Header -->
+      <div class="global-game-header glass-panel">
+
+        <div class="active-player-display">
+          <span class="now-answering-label">Now Answering:</span>
+          <h1 class="active-player-name">{{ timerService.currentPlayer()?.name }}</h1>
+          <p class="active-player-team">Team: {{ timerService.currentTeam()?.name }}</p>
+        </div>
+
+        @if (timerService.nextPlayer()) {
+        <div class="next-player-banner">
+          <span class="next-label">Next Up:</span>
+          <span class="next-value">{{ timerService.nextPlayer()?.name }} ({{ timerService.nextTeam()?.name }})</span>
+        </div>
+        }
+
+        <div class="game-controls">
+          @if (timerService.getTimerStatus()) {
+          <button (click)="timerService.goodAnswer()" class="btn btn-correct">
+            ✓ Bonne Réponse
+          </button>
+          <button (click)="timerService.stopTimer()" class="btn btn-pause">
+            ⏸ Pause
+          </button>
+          }
+          @else {
+          <button (click)="timerService.startTimer()" class="btn btn-start-game">
+            ▶ Start Timer
+          </button>
+          }
+          <button (click)="timerService.resetGame()" class="btn btn-reset">
+            Reset Round
+          </button>
+        </div>
+      </div>
+
+      <!-- All Team Timers Grid -->
+      <div class="team-timers-grid">
+        @for (team of this.teams(); track team.id) {
+        <div class="team-timer-card glass-card" 
+             [class.active]="team.id === timerService.activeTeamId() && team.time > 0"
+             [class.warning]="team.time < 15000 && team.time > 0"
+             [class.eliminated]="team.time <= 0">
+          @if (team.id === timerService.activeTeamId() && team.time > 0) {
+            <div class="card-status-badge">Answering</div>
+          }
+          @if (team.time <= 0) {
+            <div class="card-status-badge eliminated-badge">Out</div>
+          }
+
+          <h3 class="team-card-title">{{ team.name }}</h3>
+          <div class="team-card-players">
+            <span>{{ team.players[0]?.name }}</span>
+            <span class="dot-separator">•</span>
+            <span>{{ team.players[1]?.name }}</span>
+          </div>
+
+          <div class="team-card-timer">
+            {{ formatTime(team.time) }}
+          </div>
+
+          <div class="team-card-score">
+            Score: {{ team.score }} pts
+          </div>
+
+          <div class="progress-bar-container">
+            <div class="progress-bar" [style.width.%]="(team.time / 60000) * 100" [class.warning]="team.time < 15000">
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+    </div>
+    }
+  </div>
+  }
 </div>
-}

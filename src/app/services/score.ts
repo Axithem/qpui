@@ -17,21 +17,23 @@ export default class Score {
 
   updateTeamScore(teamId: number, score: number) {
     this._teams.update((teams) => {
-      const team = teams.find((t) => t.id === teamId);
-      if (team) {
-        team.score = score;
-      }
-      return teams;
+      return teams.map((team) => {
+        if (team.id === teamId) {
+          return { ...team, score };
+        }
+        return team;
+      });
     });
   }
 
   addTeamScore(teamId: number, points: number) {
     this._teams.update((teams) => {
-      const team = teams.find((t) => t.id === teamId);
-      if (team) {
-        team.score += points;
-      }
-      return teams;
+      return teams.map((team) => {
+        if (team.id === teamId) {
+          return { ...team, score: Math.max(0, team.score + points) };
+        }
+        return team;
+      });
     });
   }
 
@@ -52,17 +54,32 @@ export default class Score {
 
   addPlayerToTeam(teamId: number, playerName: string) {
     this._teams.update((teams) => {
-      const team = teams.find((t) => t.id === teamId);
-      if (team) {
-        const newPlayer = {
-          id: Date.now(),
-          name: playerName,
-          active: false,
-        };
-        team.players.push(newPlayer);
-      }
-      return teams;
+      return teams.map((team) => {
+        if (team.id === teamId) {
+          const newPlayer = {
+            id: Date.now() + Math.random(),
+            name: playerName,
+            active: false,
+          };
+          return {
+            ...team,
+            players: [...team.players, newPlayer],
+          };
+        }
+        return team;
+      });
     });
   }
 
+  removeTeam(teamId: number) {
+    this._teams.update((teams) => {
+      const remaining = teams.filter((team) => team.id !== teamId);
+      // Re-index remaining teams
+      return remaining.map((t, idx) => ({ ...t, id: idx }));
+    });
+  }
+
+  clearAll() {
+    this._teams.set([]);
+  }
 }

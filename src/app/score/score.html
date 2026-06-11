@@ -1,26 +1,83 @@
-<p>score works!</p>
+<div class="score-container">
+  @if (this.setup()) {
+    <div class="setup-panel glass-panel">
+      <h2 class="setup-title">Scoreboard Setup</h2>
+      <p class="setup-subtitle">Add up to 4 teams. Each team must have exactly 2 players.</p>
 
-@if (this.settingUp) {
-<form [formGroup]="teamForm" (ngSubmit)="this.submitTeam()">
-    <input type="text" formControlName="teamName" placeholder="Team Name" class="form-control mb-2" />
-    <input type="text" formControlName="player1" placeholder="Player 1" class="form-control mb-2" />
-    <input type="text" formControlName="player2" placeholder="Player 2" class="form-control mb-2" />
-    <button type="submit" class="btn btn-primary">Add Team</button>
-</form>
+      @if (this.teams().length < 4) {
+        <form [formGroup]="teamForm" (ngSubmit)="this.submitTeam()" class="setup-form">
+          <div class="form-group">
+            <input type="text" formControlName="teamName" placeholder="Team Name" class="input-field" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group col">
+              <input type="text" formControlName="player1" placeholder="Player 1 Name" class="input-field" required />
+            </div>
+            <div class="form-group col">
+              <input type="text" formControlName="player2" placeholder="Player 2 Name" class="input-field" required />
+            </div>
+          </div>
+          <button type="submit" [disabled]="!teamForm.valid" class="btn btn-add">Add Team</button>
+        </form>
+      } @else {
+        <div class="max-teams-alert">
+          <span class="icon">✨</span> Maximum of 4 teams reached. Ready to start!
+        </div>
+      }
 
-<button (click)="this.finishSetup()" class="btn btn-success mt-3">Finish Setup</button>
-}
-@for (team of this.scoreService.teams; track team.id) {
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">{{ team.name }}</h5>
-        <p class="card-text">Players: {{ this.getPlayerNames(team) }}</p>
-        
-        @if (!this.settingUp) {
-        <p class="card-text">Score: {{ team.score }}</p>
-        <button (click)="this.addScore(team.id, 1)" class="btn btn-primary">+1</button>
-        <button (click)="this.addScore(team.id, -1)" class="btn btn-secondary">-1</button>
-        }
+      @if (this.teams().length > 0) {
+        <div class="teams-list">
+          <h3>Registered Teams ({{ this.teams().length }})</h3>
+          <div class="teams-grid">
+            @for (team of this.teams(); track team.id) {
+              <div class="team-setup-card glass-card">
+                <div class="team-card-header">
+                  <span class="team-name">{{ team.name }}</span>
+                  <button type="button" (click)="scoreService.removeTeam(team.id)" class="btn-remove" title="Remove Team">×</button>
+                </div>
+                <div class="team-players">
+                  <span class="player-tag">{{ team.players[0]?.name }}</span>
+                  <span class="player-tag">{{ team.players[1]?.name }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="setup-actions">
+        <button (click)="this.finishSetup()" [disabled]="this.teams().length < 1" class="btn btn-start">
+          Activate Scoreboard
+        </button>
+      </div>
     </div>
+  } @else {
+    <!-- Scoreboard View -->
+    <div class="scores-grid">
+      @for (team of scoreService.teams; track team.id) {
+        <div class="score-card glass-card">
+          <div class="score-card-body">
+            <h3 class="team-title">{{ team.name }}</h3>
+            <div class="player-names">{{ getPlayerNames(team) }}</div>
+            
+            <div class="score-display">
+              <span class="score-value">{{ team.score }}</span>
+              <span class="score-label">Points</span>
+            </div>
+            
+            <div class="score-adjust-controls">
+              <button (click)="this.addScore(team.id, 1)" class="btn-adjust btn-plus" title="Add 1 Point">+1</button>
+              <button (click)="this.addScore(team.id, -1)" class="btn-adjust btn-minus" title="Subtract 1 Point">-1</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    
+    <div class="setup-actions">
+      <button (click)="this.startNewSetup()" class="btn btn-edit mt-3">
+        New Score Setup
+      </button>
+    </div>
+  }
 </div>
-}

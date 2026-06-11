@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { computed, Injectable, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import TimerService from '../timer';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import Team from '../types/team';
@@ -17,6 +16,9 @@ export class Timer {
   setup = signal<boolean>(true);
 
   finishSetup() {
+    if (this.teams().length > 0) {
+      this.timerService.setActiveTeam(this.teams()[0].id);
+    }
     this.setup.set(false);  
   }
 
@@ -32,7 +34,7 @@ export class Timer {
 
   formatTime(milliseconds: number): string {
     const totalSeconds = Math.floor(milliseconds / 1000);
-    const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds (10ms units)
+    const ms = Math.floor((milliseconds % 1000) / 10); // Get centiseconds
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60);
     
@@ -51,5 +53,10 @@ export class Timer {
       this.timerService.addPlayerToTeam(teamId, player2);
       this.teamForm.reset();
     }
+  }
+
+  startNewSetup() {
+    this.timerService.clearAll();
+    this.setup.set(true);
   }
 }
